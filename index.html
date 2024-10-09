@@ -3,45 +3,244 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Instagram User List</title>
+    <title>Instagram Unfollower Manager</title>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;700&display=swap" rel="stylesheet">
     <style>
         body {
-            font-family: Arial, sans-serif;
-            margin: 20px;
+            font-family: 'Roboto', sans-serif;
+            background-color: #f3f4f6;
+            margin: 0;
+            padding: 0;
+            color: #333;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: flex-start;
+            min-height: 100vh;
         }
-        .filter-section {
+
+        h1 {
+            color: #333;
+            font-weight: 700;
+            margin: 20px 0;
+            font-size: 2.5em;
+        }
+
+        .container {
+            width: 90%;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* File Input and Copy Button Section */
+        .controls {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
             margin-bottom: 20px;
         }
-        .user-list {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 20px;
-        }
-        .user-card {
-            width: 150px;
-            text-align: center;
-            padding: 10px;
+
+        #jsonFile {
+            padding: 10px 20px;
+            font-size: 1em;
             border: 1px solid #ccc;
             border-radius: 8px;
+            cursor: pointer;
+            background-color: #007bff;
+            color: #fff;
         }
-        .user-card img {
-            border-radius: 50%;
-            width: 100px;
-            height: 100px;
-            object-fit: cover;
+
+        #copyButton {
+            padding: 10px 20px;
+            background-color: #28a745;
+            color: white;
+            border-radius: 8px;
+            cursor: pointer;
+            border: none;
+            font-size: 1em;
+            visibility: hidden; /* Initially hidden */
         }
+
+        #copyButton:hover {
+            background-color: #218838;
+        }
+
+        /* Stats Section */
+        .stats {
+            display: flex;
+            justify-content: space-around;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+
+        .stats div {
+            background-color: #f8f9fa;
+            padding: 15px 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+            width: 18%;
+        }
+
+        .stats div span {
+            font-weight: bold;
+            display: block;
+            margin-bottom: 5px;
+            font-size: 1.2em;
+            color: #333;
+        }
+
+        /* Filters Section */
         .filters {
             display: flex;
-            gap: 15px;
+            gap: 10px;
+            justify-content: center;
+            margin-bottom: 20px;
+        }
+
+        .filters label {
+            background-color: #007bff;
+            color: white;
+            padding: 10px 15px;
+            border-radius: 50px;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+            font-size: 0.9em;
+        }
+
+        .filters input[type="checkbox"] {
+            margin-right: 10px;
+        }
+
+        .filters label:hover {
+            background-color: #0056b3;
+        }
+
+        #addByFilterButton {
+            padding: 10px 20px;
+            background-color: #ffc107;
+            color: white;
+            border-radius: 8px;
+            cursor: pointer;
+            border: none;
+            font-size: 1em;
+        }
+
+        #addByFilterButton:hover {
+            background-color: #e0a800;
+        }
+
+        /* User Lists */
+        .user-lists {
+            display: flex;
+            gap: 20px;
+            width: 100%;
+        }
+
+        .user-list, .selected-list {
+            flex: 1;
+            background-color: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0px 2px 5px rgba(0, 0, 0, 0.1);
+            max-height: 500px;
+            overflow-y: auto;
+        }
+
+        .user-list h2, .selected-list h2 {
+            text-align: center;
+            font-size: 1.5em;
+            margin-bottom: 20px;
+        }
+
+        /* User Cards */
+        .user-card {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 10px;
+            margin-bottom: 10px;
+            border-bottom: 1px solid #f1f1f1;
+        }
+
+        .user-card img {
+            border-radius: 50%;
+            width: 50px;
+            height: 50px;
+            object-fit: cover;
+            margin-right: 10px;
+        }
+
+        .user-card img.broken {
+            content: url('https://via.placeholder.com/50'); /* Default mockup image */
+        }
+
+        .user-card p {
+            font-size: 1em;
+            margin: 0;
+        }
+
+        .user-card input[type="checkbox"] {
+            margin-right: 10px;
+        }
+
+        /* Responsive Adjustments */
+        @media (max-width: 768px) {
+            .controls, .stats {
+                flex-direction: column;
+            }
+
+            .stats div {
+                width: 100%;
+                margin-bottom: 10px;
+            }
+
+            .user-lists {
+                flex-direction: column;
+            }
         }
     </style>
 </head>
 <body>
 
-    <h1>Instagram User List</h1>
+    <h1>Instagram Unfollower Manager</h1>
 
-    <div class="filter-section">
-        <input type="file" id="jsonFile" accept=".json">
+    <!-- Main Container -->
+    <div class="container">
+
+        <!-- File Input and Copy Button Section -->
+        <div class="controls">
+            <input type="file" id="jsonFile" accept=".json">
+            <button id="copyButton">Copy Selected to Clipboard</button>
+        </div>
+
+        <!-- Stats Section -->
+        <div class="stats">
+            <div>
+                <span id="totalUsers">0</span>
+                Total Users
+            </div>
+            <div>
+                <span id="privateCount">0</span>
+                Private Accounts
+            </div>
+            <div>
+                <span id="verifiedCount">0</span>
+                Verified Accounts
+            </div>
+            <div>
+                <span id="followedCount">0</span>
+                Followed by Viewer
+            </div>
+            <div>
+                <span id="selectedCount">0</span>
+                Selected for Removal
+            </div>
+        </div>
+
+        <!-- Filters and Add by Filter Button -->
         <div class="filters">
             <label>
                 <input type="checkbox" id="filterPrivate"> Private Accounts
@@ -59,12 +258,30 @@
                 <input type="checkbox" id="filterRequestedByViewer"> Requested By Viewer
             </label>
         </div>
-    </div>
 
-    <div class="user-list" id="userList"></div>
+        <!-- Add All by Filter Button -->
+        <button id="addByFilterButton">Add All by Filter</button>
+
+        <!-- User Lists (Left: All Profiles | Right: Selected Profiles) -->
+        <div class="user-lists">
+            <!-- All Profiles -->
+            <div class="user-list">
+                <h2>All Profiles</h2>
+                <div id="userList"></div>
+            </div>
+
+            <!-- Selected Profiles -->
+            <div class="selected-list">
+                <h2>Selected Profiles</h2>
+                <div id="selectedList"></div>
+            </div>
+        </div>
+    </div>
 
     <script>
         let usersData = [];
+        let filteredUsers = [];
+        let selectedUsers = [];
 
         // Function to load the JSON file
         document.getElementById('jsonFile').addEventListener('change', function(event) {
@@ -73,7 +290,9 @@
 
             reader.onload = function(e) {
                 usersData = JSON.parse(e.target.result);
+                filteredUsers = [...usersData]; // Start with all users
                 displayUsers(usersData);
+                updateStats(usersData);
             };
 
             if (file) {
@@ -89,40 +308,141 @@
             users.forEach(user => {
                 const userCard = document.createElement('div');
                 userCard.classList.add('user-card');
-                userCard.innerHTML = `
-                    <img src="${user.profile_pic_url}" alt="${user.username}">
-                    <p>${user.username}</p>
-                `;
+
+                const img = document.createElement('img');
+                img.src = user.profile_pic_url;
+                img.alt = user.username;
+
+                // Handle broken image
+                img.onerror = function() {
+                    img.classList.add('broken'); // Use fallback mockup
+                };
+
+                const checkbox = document.createElement('input');
+                checkbox.type = 'checkbox';
+                checkbox.value = user.username;
+                checkbox.addEventListener('change', () => handleSelection(user, checkbox.checked));
+
+                userCard.appendChild(img);
+                userCard.innerHTML += `<p>@${user.username}</p>`;
+                userCard.appendChild(checkbox);
                 userList.appendChild(userCard);
             });
         }
 
-        // Filter functionality
-        const filters = {
-            filterPrivate: document.getElementById('filterPrivate'),
-            filterVerified: document.getElementById('filterVerified'),
-            filterFollowedByViewer: document.getElementById('filterFollowedByViewer'),
-            filterFollowsViewer: document.getElementById('filterFollowsViewer'),
-            filterRequestedByViewer: document.getElementById('filterRequestedByViewer'),
-        };
+        // Function to handle user selection
+        function handleSelection(user, isChecked) {
+            if (isChecked) {
+                // Add to selected list
+                selectedUsers.push(user);
+            } else {
+                // Remove from selected list
+                selectedUsers = selectedUsers.filter(u => u.id !== user.id);
+            }
 
-        Object.values(filters).forEach(filter => {
-            filter.addEventListener('change', applyFilters);
-        });
+            displaySelectedUsers(); // Refresh the right-side list
+            updateSelectedCount(); // Update selected count
+            enableCopyButton(); // Enable or disable copy button based on selection
+        }
 
+        // Display selected users in the right-hand side list
+        function displaySelectedUsers() {
+            const selectedList = document.getElementById('selectedList');
+            selectedList.innerHTML = '';  // Clear previous list
+
+            selectedUsers.forEach(user => {
+                const userCard = document.createElement('div');
+                userCard.classList.add('user-card');
+
+                const img = document.createElement('img');
+                img.src = user.profile_pic_url;
+                img.alt = user.username;
+
+                // Handle broken image
+                img.onerror = function() {
+                    img.classList.add('broken'); // Use fallback mockup
+                };
+
+                userCard.appendChild(img);
+                userCard.innerHTML += `<p>${user.username}</p>`;
+                selectedList.appendChild(userCard);
+            });
+        }
+
+        // Apply filters and display filtered users
         function applyFilters() {
-            const filteredUsers = usersData.filter(user => {
-                const matchPrivate = filters.filterPrivate.checked ? user.is_private : true;
-                const matchVerified = filters.filterVerified.checked ? user.is_verified : true;
-                const matchFollowedByViewer = filters.filterFollowedByViewer.checked ? user.followed_by_viewer : true;
-                const matchFollowsViewer = filters.filterFollowsViewer.checked ? user.follows_viewer : true;
-                const matchRequestedByViewer = filters.filterRequestedByViewer.checked ? user.requested_by_viewer : true;
+            const filters = {
+                filterPrivate: document.getElementById('filterPrivate').checked,
+                filterVerified: document.getElementById('filterVerified').checked,
+                filterFollowedByViewer: document.getElementById('filterFollowedByViewer').checked,
+                filterFollowsViewer: document.getElementById('filterFollowsViewer').checked,
+                filterRequestedByViewer: document.getElementById('filterRequestedByViewer').checked
+            };
 
-                return matchPrivate && matchVerified && matchFollowedByViewer && matchFollowsViewer && matchRequestedByViewer;
+            filteredUsers = usersData.filter(user => {
+                return (!filters.filterPrivate || user.is_private) &&
+                    (!filters.filterVerified || user.is_verified) &&
+                    (!filters.filterFollowedByViewer || user.followed_by_viewer) &&
+                    (!filters.filterFollowsViewer || user.follows_viewer) &&
+                    (!filters.filterRequestedByViewer || user.requested_by_viewer);
             });
 
             displayUsers(filteredUsers);
         }
+
+        // Add all filtered users to the selected list
+        document.getElementById('addByFilterButton').addEventListener('click', function() {
+            filteredUsers.forEach(user => {
+                if (!selectedUsers.some(u => u.id === user.id)) {
+                    selectedUsers.push(user); // Add unique users
+                }
+            });
+
+            displaySelectedUsers(); // Refresh right-hand list
+            updateSelectedCount();
+            enableCopyButton(); // Enable copy button
+        });
+
+        // Update Stats
+        function updateStats(users) {
+            document.getElementById('totalUsers').innerText = users.length;
+            document.getElementById('privateCount').innerText = users.filter(user => user.is_private).length;
+            document.getElementById('verifiedCount').innerText = users.filter(user => user.is_verified).length;
+            document.getElementById('followedCount').innerText = users.filter(user => user.followed_by_viewer).length;
+        }
+
+        // Update selected count
+        function updateSelectedCount() {
+            document.getElementById('selectedCount').innerText = selectedUsers.length;
+        }
+
+        // Enable or disable the "Copy to Clipboard" button
+        function enableCopyButton() {
+            const copyButton = document.getElementById('copyButton');
+            copyButton.style.visibility = selectedUsers.length === 0 ? 'hidden' : 'visible';
+        }
+
+        // Copy to clipboard functionality
+        document.getElementById('copyButton').addEventListener('click', function() {
+            const jsonString = JSON.stringify(selectedUsers, null, 2);
+            copyToClipboard(jsonString);
+            alert('Selected users copied to clipboard!');
+        });
+
+        // Copy JSON to clipboard
+        function copyToClipboard(text) {
+            const tempInput = document.createElement('textarea');
+            tempInput.value = text;
+            document.body.appendChild(tempInput);
+            tempInput.select();
+            document.execCommand('copy');
+            document.body.removeChild(tempInput);
+        }
+
+        // Apply filters when checkboxes are clicked
+        document.querySelectorAll('.filters input[type="checkbox"]').forEach(filter => {
+            filter.addEventListener('change', applyFilters);
+        });
     </script>
 
 </body>
