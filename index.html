@@ -49,7 +49,7 @@
             border: 1px solid #ccc;
             border-radius: 8px;
             cursor: pointer;
-            background-color: #007bff;
+            background-color: #6789BA;
             color: #fff;
         }
 
@@ -82,9 +82,12 @@
             border-radius: 8px;
             box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
             width: 18%;
+            padding: 10px;
+           align-content: center;
         }
 
         .stats div span {
+            
             font-weight: bold;
             display: block;
             margin-bottom: 5px;
@@ -92,16 +95,22 @@
             color: #333;
         }
 
+        .stats div small {
+            color: #555;
+            font-size: 0.85em;
+        }
+
         /* Filters Section */
         .filters {
             display: flex;
+            flex-wrap: wrap;
             gap: 10px;
             justify-content: center;
             margin-bottom: 20px;
         }
 
         .filters label {
-            background-color: #007bff;
+            background-color: #7EC0E4;
             color: white;
             padding: 10px 15px;
             border-radius: 50px;
@@ -115,7 +124,7 @@
         }
 
         .filters label:hover {
-            background-color: #0056b3;
+            background-color: #7EC0E4;
         }
 
         #addByFilterButton {
@@ -132,8 +141,24 @@
             background-color: #e0a800;
         }
 
+        #removeAllButton {
+            padding: 10px 20px;
+            background-color: #F02A71;
+            color: white;
+            border-radius: 8px;
+            cursor: pointer;
+            border: none;
+            margin-top: 10px;
+            width: 100%;
+        }
+
+        #removeAllButton:hover {
+            background-color: #c82333;
+        }
+
         /* User Lists */
         .user-lists {
+            padding: 15px;
             display: flex;
             gap: 20px;
             width: 100%;
@@ -186,6 +211,19 @@
             margin-right: 10px;
         }
 
+        .user-card button {
+            background-color: #F02A71;
+            color: white;
+            border: none;
+            padding: 5px 10px;
+            border-radius: 8px;
+            cursor: pointer;
+        }
+
+        .user-card button:hover {
+            background-color: #F02A71;
+        }
+
         /* Responsive Adjustments */
         @media (max-width: 768px) {
             .controls, .stats {
@@ -223,18 +261,18 @@
                 Total Users
             </div>
             <div>
-                <span id="privateCount">0</span>
-                Private Accounts
+                <span id="privateCount">0</span>Private
+                <span id="publicCount">0</span>Public
             </div>
             <div>
-                <span id="verifiedCount">0</span>
-                Verified Accounts
+                <span id="verifiedCount">0</span>Verified
+                <span id="unverifiedCount">0</span>Unverified
             </div>
             <div>
-                <span id="followedCount">0</span>
-                Followed by Viewer
+                <span id="followedCount">0</span>Followed by Viewer
+                <span id="notFollowedCount">0</span>Not Followed
             </div>
-            <div>
+            <div style="background-color: #F02A71;">
                 <span id="selectedCount">0</span>
                 Selected for Removal
             </div>
@@ -246,16 +284,31 @@
                 <input type="checkbox" id="filterPrivate"> Private Accounts
             </label>
             <label>
+                <input type="checkbox" id="filterPublic"> Public Accounts
+            </label>
+            <label>
                 <input type="checkbox" id="filterVerified"> Verified Accounts
+            </label>
+            <label>
+                <input type="checkbox" id="filterUnverified"> Unverified Accounts
             </label>
             <label>
                 <input type="checkbox" id="filterFollowedByViewer"> Followed By Viewer
             </label>
             <label>
+                <input type="checkbox" id="filterNotFollowedByViewer"> Not Followed by Viewer
+            </label>
+            <label>
                 <input type="checkbox" id="filterFollowsViewer"> Follows Viewer
             </label>
             <label>
+                <input type="checkbox" id="filterNotFollowsViewer"> Does Not Follow Viewer
+            </label>
+            <label>
                 <input type="checkbox" id="filterRequestedByViewer"> Requested By Viewer
+            </label>
+            <label>
+                <input type="checkbox" id="filterNotRequestedByViewer"> Not Requested by Viewer
             </label>
         </div>
 
@@ -273,7 +326,9 @@
             <!-- Selected Profiles -->
             <div class="selected-list">
                 <h2>Selected Profiles</h2>
+                <button id="removeAllButton">Remove All from Selected</button>
                 <div id="selectedList"></div>
+                
             </div>
         </div>
     </div>
@@ -324,7 +379,7 @@
                 checkbox.addEventListener('change', () => handleSelection(user, checkbox.checked));
 
                 userCard.appendChild(img);
-                userCard.innerHTML += `<p>@${user.username}</p>`;
+                userCard.innerHTML += `<p>${user.username}</p>`;
                 userCard.appendChild(checkbox);
                 userList.appendChild(userCard);
             });
@@ -363,28 +418,51 @@
                     img.classList.add('broken'); // Use fallback mockup
                 };
 
+                const removeButton = document.createElement('button');
+                removeButton.innerText = 'Remove';
+                removeButton.addEventListener('click', () => removeFromSelected(user));
+
                 userCard.appendChild(img);
                 userCard.innerHTML += `<p>${user.username}</p>`;
+                userCard.appendChild(removeButton);
                 selectedList.appendChild(userCard);
             });
+        }
+
+        // Remove a user from the selected list
+        function removeFromSelected(user) {
+            selectedUsers = selectedUsers.filter(u => u.id !== user.id);
+            displaySelectedUsers(); // Refresh the right-side list
+            updateSelectedCount(); // Update selected count
+            enableCopyButton(); // Enable or disable copy button based on selection
         }
 
         // Apply filters and display filtered users
         function applyFilters() {
             const filters = {
                 filterPrivate: document.getElementById('filterPrivate').checked,
+                filterPublic: document.getElementById('filterPublic').checked,
                 filterVerified: document.getElementById('filterVerified').checked,
+                filterUnverified: document.getElementById('filterUnverified').checked,
                 filterFollowedByViewer: document.getElementById('filterFollowedByViewer').checked,
+                filterNotFollowedByViewer: document.getElementById('filterNotFollowedByViewer').checked,
                 filterFollowsViewer: document.getElementById('filterFollowsViewer').checked,
-                filterRequestedByViewer: document.getElementById('filterRequestedByViewer').checked
+                filterNotFollowsViewer: document.getElementById('filterNotFollowsViewer').checked,
+                filterRequestedByViewer: document.getElementById('filterRequestedByViewer').checked,
+                filterNotRequestedByViewer: document.getElementById('filterNotRequestedByViewer').checked
             };
 
             filteredUsers = usersData.filter(user => {
                 return (!filters.filterPrivate || user.is_private) &&
+                    (!filters.filterPublic || !user.is_private) &&
                     (!filters.filterVerified || user.is_verified) &&
+                    (!filters.filterUnverified || !user.is_verified) &&
                     (!filters.filterFollowedByViewer || user.followed_by_viewer) &&
+                    (!filters.filterNotFollowedByViewer || !user.followed_by_viewer) &&
                     (!filters.filterFollowsViewer || user.follows_viewer) &&
-                    (!filters.filterRequestedByViewer || user.requested_by_viewer);
+                    (!filters.filterNotFollowsViewer || !user.follows_viewer) &&
+                    (!filters.filterRequestedByViewer || user.requested_by_viewer) &&
+                    (!filters.filterNotRequestedByViewer || !user.requested_by_viewer);
             });
 
             displayUsers(filteredUsers);
@@ -403,12 +481,27 @@
             enableCopyButton(); // Enable copy button
         });
 
+        // Remove all users from the selected list
+        document.getElementById('removeAllButton').addEventListener('click', function() {
+            selectedUsers = []; // Clear the selected users list
+            displaySelectedUsers(); // Refresh the right-side list
+            updateSelectedCount();
+            enableCopyButton(); // Hide copy button
+        });
+
         // Update Stats
         function updateStats(users) {
+            const privateCount = users.filter(user => user.is_private).length;
+            const verifiedCount = users.filter(user => user.is_verified).length;
+            const followedCount = users.filter(user => user.followed_by_viewer).length;
+
             document.getElementById('totalUsers').innerText = users.length;
-            document.getElementById('privateCount').innerText = users.filter(user => user.is_private).length;
-            document.getElementById('verifiedCount').innerText = users.filter(user => user.is_verified).length;
-            document.getElementById('followedCount').innerText = users.filter(user => user.followed_by_viewer).length;
+            document.getElementById('privateCount').innerText = privateCount;
+            document.getElementById('publicCount').innerText = users.length - privateCount;
+            document.getElementById('verifiedCount').innerText = verifiedCount;
+            document.getElementById('unverifiedCount').innerText = users.length - verifiedCount;
+            document.getElementById('followedCount').innerText = followedCount;
+            document.getElementById('notFollowedCount').innerText = users.length - followedCount;
         }
 
         // Update selected count
