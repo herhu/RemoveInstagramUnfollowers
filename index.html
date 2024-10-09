@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Instagram User List</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+        }
+        .filter-section {
+            margin-bottom: 20px;
+        }
+        .user-list {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 20px;
+        }
+        .user-card {
+            width: 150px;
+            text-align: center;
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 8px;
+        }
+        .user-card img {
+            border-radius: 50%;
+            width: 100px;
+            height: 100px;
+            object-fit: cover;
+        }
+        .filters {
+            display: flex;
+            gap: 15px;
+        }
+    </style>
+</head>
+<body>
+
+    <h1>Instagram User List</h1>
+
+    <div class="filter-section">
+        <input type="file" id="jsonFile" accept=".json">
+        <div class="filters">
+            <label>
+                <input type="checkbox" id="filterPrivate"> Private Accounts
+            </label>
+            <label>
+                <input type="checkbox" id="filterVerified"> Verified Accounts
+            </label>
+            <label>
+                <input type="checkbox" id="filterFollowedByViewer"> Followed By Viewer
+            </label>
+            <label>
+                <input type="checkbox" id="filterFollowsViewer"> Follows Viewer
+            </label>
+            <label>
+                <input type="checkbox" id="filterRequestedByViewer"> Requested By Viewer
+            </label>
+        </div>
+    </div>
+
+    <div class="user-list" id="userList"></div>
+
+    <script>
+        let usersData = [];
+
+        // Function to load the JSON file
+        document.getElementById('jsonFile').addEventListener('change', function(event) {
+            const file = event.target.files[0];
+            const reader = new FileReader();
+
+            reader.onload = function(e) {
+                usersData = JSON.parse(e.target.result);
+                displayUsers(usersData);
+            };
+
+            if (file) {
+                reader.readAsText(file);
+            }
+        });
+
+        // Function to display the users in the list
+        function displayUsers(users) {
+            const userList = document.getElementById('userList');
+            userList.innerHTML = '';  // Clear previous data
+
+            users.forEach(user => {
+                const userCard = document.createElement('div');
+                userCard.classList.add('user-card');
+                userCard.innerHTML = `
+                    <img src="${user.profile_pic_url}" alt="${user.username}">
+                    <p>${user.username}</p>
+                `;
+                userList.appendChild(userCard);
+            });
+        }
+
+        // Filter functionality
+        const filters = {
+            filterPrivate: document.getElementById('filterPrivate'),
+            filterVerified: document.getElementById('filterVerified'),
+            filterFollowedByViewer: document.getElementById('filterFollowedByViewer'),
+            filterFollowsViewer: document.getElementById('filterFollowsViewer'),
+            filterRequestedByViewer: document.getElementById('filterRequestedByViewer'),
+        };
+
+        Object.values(filters).forEach(filter => {
+            filter.addEventListener('change', applyFilters);
+        });
+
+        function applyFilters() {
+            const filteredUsers = usersData.filter(user => {
+                const matchPrivate = filters.filterPrivate.checked ? user.is_private : true;
+                const matchVerified = filters.filterVerified.checked ? user.is_verified : true;
+                const matchFollowedByViewer = filters.filterFollowedByViewer.checked ? user.followed_by_viewer : true;
+                const matchFollowsViewer = filters.filterFollowsViewer.checked ? user.follows_viewer : true;
+                const matchRequestedByViewer = filters.filterRequestedByViewer.checked ? user.requested_by_viewer : true;
+
+                return matchPrivate && matchVerified && matchFollowedByViewer && matchFollowsViewer && matchRequestedByViewer;
+            });
+
+            displayUsers(filteredUsers);
+        }
+    </script>
+
+</body>
+</html>
